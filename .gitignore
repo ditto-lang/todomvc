@@ -1,0 +1,7 @@
+.ditto
+dist
+node_modules
+packages
+
+# vite build
+build

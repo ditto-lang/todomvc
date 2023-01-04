@@ -1,0 +1,332 @@
+module Main exports (
+    main,
+);
+
+import (std) Array;
+import (std) Bool;
+import (std) Int;
+import (std) Maybe (
+    Maybe(..),
+);
+import (std) String;
+
+import (vdom) App;
+import (vdom) Attributes as Attr;
+import (vdom) Events;
+import (vdom) Html;
+
+
+type alias Todo = { 
+    id: Int,
+    description: String,
+    completed: Bool,
+    editing: Bool,
+};
+
+type alias State = { next_id: Int, draft: String, todos: Array(Todo) };
+
+type Event =
+    | Noop
+    | UpdateDraft(String)
+    | SaveDraft
+    | UpdateTodo(Todo)
+    | CheckAll
+    | DeleteTodo(Int)
+    | ClearCompleted;
+
+type alias Html = Html.Html(Event);
+
+initial_state: State = { next_id = 0, draft = "", todos = [] };
+
+main = fn (container: App.Element): Effect(Unit) -> App.mount(
+    {
+        container = container,
+        initial_state = initial_state,
+        view = view,
+        update = update,
+    },
+);
+
+view_header = fn (draft: String) -> Html.header(
+    [Attr.classes(["header"])],
+    [
+        Html.h1([], [Html.text("todos")]),
+        Html.input(
+            [
+                Attr.classes(["new-todo"]),
+                Attr.placeholder("What needs to be done?"),
+                Attr.autofocus(true),
+                Attr.value(draft),
+                Events.on_input(UpdateDraft),
+                Events.on_key_down(
+                    fn (key) ->
+                        if
+                            String.is_eq(key, "Enter")
+                            |> Bool.and(
+                                String.length(draft)
+                                |> Int.is_greater_than(0),
+                            )
+                        then
+                            SaveDraft
+                        else
+                            Noop,
+                ),
+            ],
+            [],
+        ),
+    ],
+);
+
+view_main = fn (state: State): Html -> Html.section(
+    [Attr.classes(["main"])],
+    [
+        Html.input(
+            [
+                Attr.id("toggle-all"),
+                Attr.classes(["toggle-all"]),
+                Attr.type_("checkbox"),
+                Events.on_click(CheckAll),
+            ],
+            [],
+        ),
+        Html.label(
+            [Attr.for("toggle-all")],
+            [Html.text("Mark all as complete")],
+        ),
+        if Bool.not(Array.is_empty(state.todos)) then
+            view_todo_list(state.todos)
+        else
+            Html.empty,
+        if Bool.not(Array.is_empty(state.todos)) then
+            view_footer(state.todos)
+        else
+            Html.empty,
+    ],
+);
+
+view_todo_list = fn (todos: Array(Todo)): Html -> Html.ul(
+    [Attr.classes(["todo-list"])],
+    Array.map(todos, view_todo),
+);
+
+view_todo = fn (todo: Todo): Html -> Html.li(
+    [
+        Attr.classes(
+            Array.filter(
+                [
+                    if todo.completed then
+                        Just("completed")
+                    else
+                        Nothing,
+                    if todo.editing then
+                        Just("editing")
+                    else
+                        Nothing,
+                ],
+                fn (cls) -> cls,
+            ),
+        ),
+    ],
+    [
+        Html.div(
+            [Attr.classes(["view"])],
+            [
+                Html.input(
+                    [
+                        Attr.classes(["toggle"]),
+                        Attr.type_("checkbox"),
+                        Attr.checked(todo.completed),
+                        Events.on_click(
+                            UpdateTodo(
+                                { todo | completed = Bool.not(todo.completed) },
+                            ),
+                        ),
+                    ],
+                    [],
+                ),
+                Html.label(
+                    [
+                        Events.on_double_click(
+                            UpdateTodo({ todo | editing = true }),
+                        ),
+                    ],
+                    [Html.text(todo.description)],
+                ),
+                Html.button(
+                    [
+                        Attr.classes(["destroy"]),
+                        Events.on_click(DeleteTodo(todo.id)),
+                    ],
+                    [],
+                ),
+            ],
+        ),
+        Html.input(
+            [
+                Attr.classes(["edit"]),
+                Attr.value(todo.description),
+                Events.on_input(
+                    fn (description) -> UpdateTodo(
+                        { todo | description = description },
+                    ),
+                ),
+                Events.on_blur(UpdateTodo({ todo | editing = false })),
+                Events.on_key_down(
+                    fn (key) ->
+                        if String.is_eq(key, "Enter") then
+                            UpdateTodo({ todo | editing = false })
+                        else
+                            Noop,
+                ),
+            ],
+            [],
+        ),
+    ],
+);
+
+view_footer = fn (todos: Array(Todo)) ->
+    let
+        completed_todos = Array.filter(
+            todos,
+            fn (todo) -> if todo.completed then Just(todo) else Nothing,
+        );
+
+        items_left =
+            Array.length(todos)
+            |> Int.subtract(Array.length(completed_todos));
+
+        any_completed = Bool.not(Array.is_empty(completed_todos));
+    in
+    Html.footer(
+        [Attr.classes(["footer"])],
+        [
+            Html.span(
+                [Attr.classes(["todo-count"])],
+                [
+                    Html.strong([], [Html.text(Int.to_string(items_left))]),
+                    if Int.is_eq(items_left, 1) then
+                        Html.text(" item left")
+                    else
+                        Html.text(" items left"),
+                ],
+            ),
+            if any_completed then
+                Html.button(
+                    [
+                        Attr.classes(["clear-completed"]),
+                        Events.on_click(ClearCompleted),
+                    ],
+                    [Html.text("Clear completed")],
+                )
+            else
+                Html.empty,
+        ],
+    );
+
+view_info = Html.footer(
+    [Attr.classes(["info"])],
+    [
+        --
+        Html.p([], [Html.text("Double-click to edit a todo")]),
+        Html.p(
+            [],
+            [
+                Html.text("Created by "),
+                Html.a(
+                    [Attr.href("https://github.com/jmackie")],
+                    [Html.text("Jordan Mackie")],
+                ),
+            ],
+        ),
+        Html.p(
+            [],
+            [
+                Html.text("Part of "),
+                Html.a(
+                    [Attr.href("http://todomvc.com#")],
+                    [Html.text("TodoMVC")],
+                ),
+            ],
+        ),
+    ],
+);
+
+view = fn (state: State): Html -> Html.div(
+    [],
+    [
+        Html.section(
+            [Attr.classes(["todoapp"])],
+            [view_header(state.draft), view_main(state)],
+        ),
+        view_info,
+    ],
+);
+
+update = fn (state: State, event: Event): App.Next(State, Event) ->
+    match event with
+    | Noop -> { state = state, task = Nothing }
+    | SaveDraft -> {
+        state = {
+            state |
+                next_id = Int.add(state.next_id, 1),
+                draft = "",
+                todos = Array.push_start(
+                    state.todos,
+                    {
+                        id = state.next_id,
+                        description = state.draft,
+                        completed = false,
+                        editing = false,
+                    },
+                ),
+        },
+        task = Nothing,
+    }
+    | UpdateDraft(draft) -> { 
+        state = { state | draft = draft },
+        task = Nothing,
+    }
+    | UpdateTodo(latest_todo) -> {
+        state = {
+            state |
+                todos = state.todos
+                |> Array.map(
+                    fn (todo) ->
+                        if Int.is_eq(todo.id, latest_todo.id) then
+                            latest_todo
+                        else
+                            todo,
+                ),
+        },
+        task = Nothing,
+    }
+    | CheckAll -> {
+        state = {
+            state |
+                todos = state.todos
+                |> Array.map(fn (todo) -> { todo | completed = true }),
+        },
+        task = Nothing,
+    }
+    | DeleteTodo(id) -> {
+        state = {
+            state |
+                todos = state.todos
+                |> Array.filter(
+                    fn (todo) ->
+                        if Int.is_eq(todo.id, id) then Nothing else Just(todo),
+                ),
+        },
+        task = Nothing,
+    }
+    | ClearCompleted -> {
+        state = {
+            state |
+                todos = state.todos
+                |> Array.filter(
+                    fn (todo) -> if todo.completed then Nothing else Just(todo),
+                ),
+        },
+        task = Nothing,
+    }
+    end;
