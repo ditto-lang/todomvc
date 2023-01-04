@@ -1,0 +1,13 @@
+name = "todomvc"
+targets = ["web"]
+dependencies = ["std", "vdom"]
+test-dependencies = []
+
+[[package-set.extends]]
+url = "https://raw.githubusercontent.com/ditto-lang/package-sets/36ecceca571ff5ace49c6d81eaa0520e5f032a1d/packages.toml"
+sha256 = "b1f2c727f8877eb95bb254398826a7f0dad41581de561b9f30b2c876293d73fd"
+
+[package-set.packages.vdom]
+github = { owner = "ditto-lang", repo = "vdom" }
+revision = "6042c9b63873ef7084f263d63d5854d07fa9ff1b"
+sha256 = "c11c802cc68ffb284dd079f9a036303b93bfe3da862efc897558bdb6f2e70550"
