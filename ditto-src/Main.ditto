@@ -41,7 +41,7 @@ initial_state: State = { next_id = 0, draft = "", todos = [] }
 main = fn (container: App.Element): Effect(Unit) -> App.mount(
     {
         container = container,
-        initial_state = initial_state,
+        init = fn () -> {state = initial_state, task = Nothing },
         view = view,
         update = update,
     },

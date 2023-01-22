@@ -10,5 +10,5 @@ sha256 = "9009d6a4d00224226455dec41a653bb2e04d67a341e41c2c43e2716f62243f43"
 
 [package-set.packages.vdom]
 github = { owner = "ditto-lang", repo = "vdom" }
-revision = "bd746f63043074a1c95fe8d4b730a5c85da05386"
-sha256 = "77913432d05c54c2980720a671c9b6cd9359b2105c3353347e3398ab1f241406"
+revision = "702d6e4c1bb711b11ca6a0bc3bafc19d8fdfdb3c"
+sha256 = "e8c0ee151306a7913ccc283f5a2160e0a0385f91efeee21b9215dea99c5d1549"
