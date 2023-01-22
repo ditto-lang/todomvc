@@ -1,19 +1,19 @@
 module Main exports (
     main,
-);
+)
 
-import (std) Array;
-import (std) Bool;
-import (std) Int;
+import (std) Array
+import (std) Bool
+import (std) Int
 import (std) Maybe (
     Maybe(..),
-);
-import (std) String;
+)
+import (std) String
 
-import (vdom) App;
-import (vdom) Attributes as Attr;
-import (vdom) Events;
-import (vdom) Html;
+import (vdom) App
+import (vdom) Attributes as Attr
+import (vdom) Events
+import (vdom) Html
 
 
 type alias Todo = { 
@@ -21,9 +21,9 @@ type alias Todo = {
     description: String,
     completed: Bool,
     editing: Bool,
-};
+}
 
-type alias State = { next_id: Int, draft: String, todos: Array(Todo) };
+type alias State = { next_id: Int, draft: String, todos: Array(Todo) }
 
 type Event =
     | Noop
@@ -32,11 +32,11 @@ type Event =
     | UpdateTodo(Todo)
     | CheckAll
     | DeleteTodo(Int)
-    | ClearCompleted;
+    | ClearCompleted
 
-type alias Html = Html.Html(Event);
+type alias Html = Html.Html(Event)
 
-initial_state: State = { next_id = 0, draft = "", todos = [] };
+initial_state: State = { next_id = 0, draft = "", todos = [] }
 
 main = fn (container: App.Element): Effect(Unit) -> App.mount(
     {
@@ -45,7 +45,7 @@ main = fn (container: App.Element): Effect(Unit) -> App.mount(
         view = view,
         update = update,
     },
-);
+)
 
 view_header = fn (draft: String) -> Html.header(
     [Attr.classes(["header"])],
@@ -75,7 +75,7 @@ view_header = fn (draft: String) -> Html.header(
             [],
         ),
     ],
-);
+)
 
 view_main = fn (state: State): Html -> Html.section(
     [Attr.classes(["main"])],
@@ -102,12 +102,12 @@ view_main = fn (state: State): Html -> Html.section(
         else
             Html.empty,
     ],
-);
+)
 
 view_todo_list = fn (todos: Array(Todo)): Html -> Html.ul(
     [Attr.classes(["todo-list"])],
     Array.map(todos, view_todo),
-);
+)
 
 view_todo = fn (todo: Todo): Html -> Html.li(
     [
@@ -182,20 +182,20 @@ view_todo = fn (todo: Todo): Html -> Html.li(
             [],
         ),
     ],
-);
+)
 
 view_footer = fn (todos: Array(Todo)) ->
     let
         completed_todos = Array.filter(
             todos,
             fn (todo) -> if todo.completed then Just(todo) else Nothing,
-        );
+        )
 
         items_left =
             Array.length(todos)
-            |> Int.subtract(Array.length(completed_todos));
+            |> Int.subtract(Array.length(completed_todos))
 
-        any_completed = Bool.not(Array.is_empty(completed_todos));
+        any_completed = Bool.not(Array.is_empty(completed_todos))
     in
     Html.footer(
         [Attr.classes(["footer"])],
@@ -221,7 +221,7 @@ view_footer = fn (todos: Array(Todo)) ->
             else
                 Html.empty,
         ],
-    );
+    )
 
 view_info = Html.footer(
     [Attr.classes(["info"])],
@@ -249,7 +249,7 @@ view_info = Html.footer(
             ],
         ),
     ],
-);
+)
 
 view = fn (state: State): Html -> Html.div(
     [],
@@ -260,7 +260,7 @@ view = fn (state: State): Html -> Html.div(
         ),
         view_info,
     ],
-);
+)
 
 update = fn (state: State, event: Event): App.Next(State, Event) ->
     match event with
@@ -329,4 +329,4 @@ update = fn (state: State, event: Event): App.Next(State, Event) ->
         },
         task = Nothing,
     }
-    end;
+    end
