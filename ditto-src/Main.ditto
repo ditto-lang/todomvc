@@ -16,7 +16,7 @@ import (vdom) Events
 import (vdom) Html
 
 
-type alias Todo = { 
+type alias Todo = {
     id: Int,
     description: String,
     completed: Bool,
@@ -41,7 +41,7 @@ initial_state: State = { next_id = 0, draft = "", todos = [] }
 main = fn (container: App.Element): Effect(Unit) -> App.mount(
     {
         container = container,
-        init = fn () -> {state = initial_state, task = Nothing },
+        init = fn () -> { state = initial_state, task = Nothing },
         view = view,
         update = update,
     },
@@ -282,7 +282,7 @@ update = fn (state: State, event: Event): App.Next(State, Event) ->
         },
         task = Nothing,
     }
-    | UpdateDraft(draft) -> { 
+    | UpdateDraft(draft) -> {
         state = { state | draft = draft },
         task = Nothing,
     }
@@ -324,7 +324,8 @@ update = fn (state: State, event: Event): App.Next(State, Event) ->
             state |
                 todos = state.todos
                 |> Array.filter(
-                    fn (todo) -> if todo.completed then Nothing else Just(todo),
+                    fn (todo) ->
+                        if todo.completed then Nothing else Just(todo),
                 ),
         },
         task = Nothing,
