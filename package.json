@@ -1,9 +1,6 @@
 {
   "private": true,
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "dev": "vite",
     "prebuild": "ditto make",
@@ -11,8 +8,14 @@
     "preview": "vite preview --open"
   },
   "dependencies": {
+    "js-exception": "link:packages/js-exception",
+    "js-ref": "link:packages/js-ref",
+    "js-task": "link:packages/js-task",
+    "js-unknown": "link:packages/js-unknown",
+    "std": "link:packages/std",
     "todomvc-app-css": "2.4.2",
-    "todomvc-common": "1.0.5"
+    "todomvc-common": "1.0.5",
+    "vdom": "link:packages/vdom"
   },
   "devDependencies": {
     "prettier": "2.7.1",
